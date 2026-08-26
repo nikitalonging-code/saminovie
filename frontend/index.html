@@ -914,7 +914,7 @@
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js" defer></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>window.__APP_CONFIG__={apiBase:'https://nft-gift-backend-9krk.onrender.com'};</script>
+<script src="./runtime-config.js"></script>
 <script>
 (()=>{
   const api=(window.__APP_CONFIG__?.apiBase||'').replace(/\/$/,'');
@@ -3580,6 +3580,24 @@
 
   // Final top-up bridge for all mode balance pills.
   document.addEventListener('click',e=>{const b=e.target?.closest?.('#rocketScreen .rk-balance-pill,#caseScreen .case-balance,#upgradeScreen .upgrade-balance');if(!b)return;e.preventDefault();e.stopImmediatePropagation();window.__openTopup?.();},true);
+})();
+</script>
+
+
+<style id="v43-modal-root-fix">
+.phone > #betModal, .phone > #promoCodeModal, .phone > #tonTopupModal, .phone > #caseResult {
+  position:absolute !important; inset:0 !important; z-index:99999 !important;
+}
+.phone > #betModal .modal-sheet, .phone > #promoCodeModal .modal-sheet { z-index:100000 !important; pointer-events:auto !important; }
+#betModal, #promoCodeModal { pointer-events:auto !important; }
+</style>
+<script id="v43-modal-root-move">
+(function(){
+  function moveToPhone(){
+    const phone=document.querySelector('.phone'); if(!phone) return;
+    ['betModal','promoCodeModal','tonTopupModal','caseResult'].forEach(id=>{ const el=document.getElementById(id); if(el && el.parentElement!==phone) phone.appendChild(el); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',moveToPhone,{once:true}); else moveToPhone();
 })();
 </script>
 

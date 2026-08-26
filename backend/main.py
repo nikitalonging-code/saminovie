@@ -14,7 +14,8 @@ MRKT_WORKER_URL = os.getenv('MRKT_WORKER_URL', '').rstrip('/')
 MRKT_AUTH_TOKEN_FALLBACK = os.getenv('MRKT_AUTH_TOKEN', '').strip()
 BOT_TOKEN = os.getenv('BOT_TOKEN', '').strip()
 BOT_USERNAME = os.getenv('BOT_USERNAME', '').strip().lstrip('@')
-APP_URL = os.getenv('APP_URL', '').strip().rstrip('/')
+RENDER_EXTERNAL_URL = os.getenv('RENDER_EXTERNAL_URL', '').strip().rstrip('/')
+APP_URL = os.getenv('APP_URL', '').strip().rstrip('/') or os.getenv('FRONTEND_PUBLIC_URL', '').strip().rstrip('/')
 BACKEND_URL = os.getenv('BACKEND_URL', 'https://nft-gift-backend-9krk.onrender.com').strip().rstrip('/')
 _ADMIN_IDS_RAW = os.getenv('ADMIN_IDS', '')
 ADMIN_IDS = set(re.findall(r'\b\d{3,20}\b', _ADMIN_IDS_RAW))
@@ -638,6 +639,16 @@ def referral(x_telegram_user_id: str | None = Header(default=None)):
 def ping():
     return {'ok': True, 'ts': int(time.time())}
 
+@app.get('/telegram/webhook')
+def telegram_webhook_info():
+    if not BOT_TOKEN:
+        return {'ok': False, 'error': 'BOT_TOKEN not configured'}
+    try:
+        info = telegram_api('getWebhookInfo', {})
+        return {'ok': True, 'url': info.get('url',''), 'pending_update_count': info.get('pending_update_count',0), 'last_error_message': info.get('last_error_message','')}
+    except Exception as exc:
+        return {'ok': False, 'error': str(exc)}
+
 @app.post('/telegram/webhook')
 def telegram_webhook(update: dict):
     # /start and /start ref_CODE -> reply with a Mini App button.
@@ -662,8 +673,8 @@ def telegram_webhook(update: dict):
         keyboard={'inline_keyboard':[[{'text':'🎁 Открыть NFT Gift','web_app':{'url':url}}]]}
         text_out = 'Твоя реферальная ссылка активирована 🎁\nНажми кнопку ниже, чтобы открыть приложение.' if ref else 'Открывай NFT Gift по кнопке ниже 👇'
         telegram_api('sendMessage', {'chat_id':int(chat['id']), 'text':text_out, 'reply_markup':keyboard})
-    except Exception:
-        pass
+    except Exception as exc:
+        print('telegram_webhook error:', repr(exc))
     return {'ok': True}
 
 @app.on_event('startup')
@@ -673,11 +684,19 @@ async def background_bootstrap():
             await asyncio.to_thread(init_db)
         except Exception:
             pass
-        if os.getenv('AUTO_SET_WEBHOOK','1') == '1' and BOT_TOKEN and APP_URL and BACKEND_URL:
-            try:
-                await asyncio.to_thread(telegram_api, 'setWebhook', {'url': f'{BACKEND_URL}/telegram/webhook', 'allowed_updates':['message']})
-            except Exception:
-                pass
+        if os.getenv('AUTO_SET_WEBHOOK','1') == '1' and BOT_TOKEN:
+            public_backend = (BACKEND_URL or RENDER_EXTERNAL_URL).rstrip('/')
+            if public_backend:
+                try:
+                    await asyncio.to_thread(telegram_api, 'setWebhook', {
+                        'url': f'{public_backend}/telegram/webhook',
+                        'allowed_updates':['message'],
+                        'drop_pending_updates': False,
+                    })
+                    info = await asyncio.to_thread(telegram_api, 'getWebhookInfo', {})
+                    print('Telegram webhook:', info.get('url'), 'pending=', info.get('pending_update_count', 0))
+                except Exception as exc:
+                    print('Telegram webhook setup failed:', exc)
     asyncio.create_task(_bootstrap())
 
 @app.get('/api/rating')

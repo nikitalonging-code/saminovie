@@ -21,10 +21,16 @@ services:
         value: "https://nft-gift-worker-9krk.onrender.com"
       - key: BOT_USERNAME
         sync: false
-      - key: APP_URL
-        value: "https://nft-gift-frontend-9krk.onrender.com"
+      - key: FRONTEND_PUBLIC_URL
+        fromService:
+          type: web
+          name: nft-gift-frontend
+          envVarKey: RENDER_EXTERNAL_URL
       - key: BACKEND_URL
-        value: "https://nft-gift-backend-9krk.onrender.com"
+        fromService:
+          type: web
+          name: nft-gift-backend
+          envVarKey: RENDER_EXTERNAL_URL
       - key: BOT_TOKEN
         sync: false
       - key: ADMIN_IDS
@@ -50,7 +56,10 @@ services:
       - key: TELEGRAM_SESSION
         sync: false
       - key: API_URL
-        value: "https://nft-gift-backend-9krk.onrender.com"
+        fromService:
+          type: web
+          name: nft-gift-backend
+          envVarKey: RENDER_EXTERNAL_URL
       - key: WORKER_SECRET
         generateValue: true
       - key: PORT
@@ -62,5 +71,12 @@ services:
     name: nft-gift-frontend
     runtime: static
     rootDir: frontend
+    buildCommand: python build_runtime_config.py
     staticPublishPath: .
+    envVars:
+      - key: BACKEND_PUBLIC_URL
+        fromService:
+          type: web
+          name: nft-gift-backend
+          envVarKey: RENDER_EXTERNAL_URL
 
