@@ -1240,9 +1240,10 @@ body{background:#050506!important;color:#fff!important;}
     position:fixed!important;left:50%!important;transform:translateX(-50%)!important;bottom:0!important;
     width:min(100%,478px)!important;height:68px!important;padding:0!important;
     border:0!important;border-radius:0!important;overflow:hidden!important;
-    background:rgba(9,9,10,.72) url('assets/home_bottom_nav.png') center/100% 68px no-repeat!important;
-    backdrop-filter:blur(14px) saturate(115%)!important;-webkit-backdrop-filter:blur(14px) saturate(115%)!important;
-    box-shadow:0 -8px 22px rgba(0,0,0,.42)!important;z-index:500!important;
+    background:rgba(9,9,10,.85) url('assets/home_bottom_nav.png') center/100% 68px no-repeat!important;
+    backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;
+    border-top:1px solid rgba(255,255,255,.1)!important;
+    box-shadow:0 -4px 20px rgba(0,0,0,.3)!important;z-index:500!important;
     display:flex!important;
   }
   .bottomnav .navitem{height:68px!important;min-width:0!important;flex:1 1 20%!important;position:relative!important;z-index:2!important;background:transparent!important;border:0!important;color:transparent!important;font-size:0!important;padding:0!important;cursor:pointer!important;}
@@ -1317,6 +1318,13 @@ body{background:#050506!important;color:#fff!important;}
     <!-- MAIN TAB -->
     <div class="tabpane active" id="tab-main">
       <div class="exact-home" id="exactHome">
+        <div class="exact-live-slot">
+          <div class="top-live" id="topLiveFeed">
+            <div class="top-live-head"><span><i class="live-status-dot"></i>LIVE</span><small>Последние дропы</small></div>
+            <div class="top-live-track" id="topLiveTrack"><div class="top-live-item"><span class="top-live-ton">▽</span><div><b>Ожидаем дропы</b><span>GRAM и NFT появятся здесь</span></div></div></div>
+          </div>
+        </div>
+
         <div class="exact-balance-wrap">
           <img class="exact-balance-bg" src="assets/home_balance_clean.png" alt="">
           <button class="exact-profile-hotspot" id="openProfileBtnExact" type="button" aria-label="Открыть профиль"></button>
@@ -1326,18 +1334,11 @@ body{background:#050506!important;color:#fff!important;}
           <button class="exact-topup-button" id="topupBtnExactVisual" type="button" aria-label="Пополнить"><span class="topup-wallet-icon" aria-hidden="true">▣</span><span>Пополнить</span></button>
         </div>
 
-        <div class="exact-live-slot">
-          <div class="top-live" id="topLiveFeed">
-            <div class="top-live-head"><span><i class="live-status-dot"></i>LIVE</span><small>Последние дропы</small></div>
-            <div class="top-live-track" id="topLiveTrack"><div class="top-live-item"><span class="top-live-ton">▽</span><div><b>Ожидаем дропы</b><span>GRAM и NFT появятся здесь</span></div></div></div>
-          </div>
-        </div>
-
         <div class="exact-icon-strip"><img src="assets/home_icon_row.png" alt=""></div>
 
         <div class="exact-home-banners">
           <button class="exact-banner" id="homeRocketBanner" type="button"><img src="assets/home_rocket_banner.png" alt="РАКЕТКА"></button>
-          <button class="exact-banner" id="homeCasesBanner" type="button"><img src="assets/home_cases_banner.png" alt="CASES"></button>
+          <button class="exact-banner" id="homeCasesBanner" type="button"><img src="assets/home_cases_banner.png" alt="КЕЙСЫ"></button>
           <button class="exact-banner" id="homePlayHubBanner" type="button"><img src="assets/home_playhub_banner.png" alt="TILT PLAY"></button>
           <button class="exact-banner exact-ice-banner" id="homeIceBanner" type="button"><img src="assets/home_ice_banner.png" alt="ICE ARENA"></button>
         </div>
@@ -3835,10 +3836,18 @@ body{background:#050506!important;color:#fff!important;}
   const openRocket=()=>{try{window.__openRocketHard?.();return true;}catch(e){} const x=$('#rocketScreen'); if(x){x.classList.add('active'); return true;} return false;};
   const openIce=()=>{const x=$('#iceScreen'); if(x){x.classList.add('active'); return true;} return false;};
   const openHub=()=>{const x=$('#playHubScreen'); if(x){x.classList.add('active'); return true;} return false;};
-  $('#homeRocketBanner')?.addEventListener('click',openRocket);
-  $('#homePlayHubBanner')?.addEventListener('click',openHub);
-  $('#homeIceBanner')?.addEventListener('click',openIce);
-  $('#homeCasesBanner')?.addEventListener('click',()=>$('#casesHomeSection')?.scrollIntoView({behavior:'smooth',block:'start'}));
+  $('#homeRocketBanner')?.addEventListener('click',function(){
+    const x=$('#rocketScreen'); if(x){x.classList.add('active');x.style.display='flex';x.style.zIndex='9000';} 
+  });
+  $('#homeCasesBanner')?.addEventListener('click',function(){
+    const x=$('#caseScreen'); if(x){x.classList.add('active');x.style.display='flex';x.style.zIndex='9000';} 
+  });
+  $('#homePlayHubBanner')?.addEventListener('click',function(){
+    const x=$('#playHubScreen'); if(x){x.classList.add('active');x.style.display='flex';x.style.zIndex='9000';} 
+  });
+  $('#homeIceBanner')?.addEventListener('click',function(){
+    const x=$('#iceScreen'); if(x){x.classList.add('active');x.style.display='flex';x.style.zIndex='9000';} 
+  });
   // Keep all monetary UI branded as GRAM while backend/API fields remain unchanged.
   const replaceNode=(root)=>{
     if(root.nodeType===3){root.nodeValue=root.nodeValue.replace(/\bTON\b/g,'GRAM');return;}
@@ -3891,8 +3900,8 @@ body{background:#050506!important;color:#fff!important;}
     const b=e.target?.closest?.('#homeRocketBanner,#homeCasesBanner,#homePlayHubBanner,#homeIceBanner');
     if(!b)return;
     e.preventDefault(); e.stopImmediatePropagation();
-    if(b.id==='homeRocketBanner'){ window.__openRocketHard?.(); return; }
-    if(b.id==='homeCasesBanner'){ window.__openCaseHard?.('summer'); return; }
+    if(b.id==='homeRocketBanner'){ const x=$('#rocketScreen'); if(x){x.classList.add('active');x.style.display='flex';x.style.zIndex='9000';} return; }
+    if(b.id==='homeCasesBanner'){ const x=$('#caseScreen'); if(x){x.classList.add('active');x.style.display='flex';x.style.zIndex='9000';} return; }
     if(b.id==='homePlayHubBanner'){ const x=$('#playHubScreen'); if(x){x.classList.add('active');x.style.display='flex';x.style.zIndex='9000';} return; }
     if(b.id==='homeIceBanner'){ const x=$('#iceScreen'); if(x){x.classList.add('active');x.style.display='flex';x.style.zIndex='9000';} return; }
   },true);
